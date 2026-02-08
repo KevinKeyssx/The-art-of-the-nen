@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
-    import { navigating } from '$app/stores';
+    import { page } from '$app/state';
 
 
     let { children } = $props();
@@ -8,7 +8,7 @@
     // Estado del reproductor de música
     let audio           : HTMLAudioElement | null = null;
     let isPlaying       = $state( false );
-    let volume          = $state( 0.3 );
+    let volume          = $state( 0.8 );
     let isMuted         = $state( false );
     let currentSrc      = $state( '' );
 
@@ -37,10 +37,12 @@
         };
     });
 
-    // Observar cambios de navegación
+    // Observar cambios de navegación usando page.url.pathname (objeto reactivo de Svelte 5)
     $effect(() => {
-        if ( $navigating && audio ) {
-            const newSrc = getAudioSrc( $navigating.to?.url.pathname || '' );
+        const pathname = page.url.pathname;
+
+        if ( audio ) {
+            const newSrc = getAudioSrc( pathname );
 
             if ( newSrc !== currentSrc ) {
                 const wasPlaying = isPlaying;
