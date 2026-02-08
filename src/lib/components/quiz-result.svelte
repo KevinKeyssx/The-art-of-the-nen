@@ -1,24 +1,23 @@
 <script lang="ts">
-    import { onMount } from 'svelte';
-    import type { NEN_TYPES } from '$lib/data/nen-data';
-    
-    type NenType = (typeof NEN_TYPES)[keyof typeof NEN_TYPES];
-    
+    import { onMount }          from 'svelte';
+    import type { NEN_TYPES }   from '$lib/data/nen-data';
+
+    type NenType = ( typeof NEN_TYPES )[keyof typeof NEN_TYPES];
+
     type Result = {
-        primary: NenType;
-        secondary: NenType;
-        scores: Record<string, number>;
-        sortedScores: [string, number][];
+        primary         : NenType;
+        secondary       : NenType;
+        scores          : Record<string, number>;
+        sortedScores    : [string, number][];
     };
-    
+
     let { result, onRestart }: { result: Result; onRestart: () => void } = $props();
-    
-    let showContent = $state(false);
-    let showPrimary = $state(false);
-    let showSecondary = $state(false);
-    let showDetails = $state(false);
-    let particles = $state<Array<{ id: number; x: number; y: number; size: number; delay: number; color: string }>>([]);
-    
+
+    let showContent     = $state( false );
+    let showPrimary     = $state( false );
+    let showSecondary   = $state( false );
+    let showDetails     = $state( false );
+
     const colorClasses: Record<string, string> = {
         'nen-int': 'bg-nen-int',
         'nen-tra': 'bg-nen-tra',
@@ -27,7 +26,7 @@
         'nen-man': 'bg-nen-man',
         'nen-emi': 'bg-nen-emi'
     };
-    
+
     const textColorClasses: Record<string, string> = {
         'nen-int': 'text-nen-int',
         'nen-tra': 'text-nen-tra',
@@ -36,7 +35,7 @@
         'nen-man': 'text-nen-man',
         'nen-emi': 'text-nen-emi'
     };
-    
+
     const glowClasses: Record<string, string> = {
         'nen-int': 'glow-nen-int',
         'nen-tra': 'glow-nen-tra',
@@ -45,7 +44,7 @@
         'nen-man': 'glow-nen-man',
         'nen-emi': 'glow-nen-emi'
     };
-    
+
     const borderColorClasses: Record<string, string> = {
         'nen-int': 'border-nen-int/50',
         'nen-tra': 'border-nen-tra/50',
@@ -54,7 +53,7 @@
         'nen-man': 'border-nen-man/50',
         'nen-emi': 'border-nen-emi/50'
     };
-    
+
     const nenColorVars: Record<string, string> = {
         'nen-int': 'hsl(45 100% 50%)',
         'nen-tra': 'hsl(280 80% 60%)',
@@ -63,51 +62,21 @@
         'nen-man': 'hsl(140 70% 45%)',
         'nen-emi': 'hsl(25 95% 55%)'
     };
-    
+
     onMount(() => {
-        // Generate particles with primary nen color
-        const newParticles = [];
-        for (let i = 0; i < 50; i++) {
-        newParticles.push({
-            id: i,
-            x: 50 + (Math.random() - 0.5) * 80,
-            y: 30 + (Math.random() - 0.5) * 40,
-            size: Math.random() * 6 + 2,
-            delay: Math.random() * 2,
-            color: colorClasses[result.primary.color]
-        });
-        }
-        particles = newParticles;
-        
         // Staggered reveal
-        setTimeout(() => showContent = true, 200);
-        setTimeout(() => showPrimary = true, 800);
-        setTimeout(() => showSecondary = true, 1500);
-        setTimeout(() => showDetails = true, 2200);
+        setTimeout( () => showContent = true, 200 );
+        setTimeout( () => showPrimary = true, 800 );
+        setTimeout( () => showSecondary = true, 1500 );
+        setTimeout( () => showDetails = true, 2200 );
     });
 </script>
 
 <div class="min-h-screen flex items-center justify-center px-4 py-20 relative">
-    <!-- Animated particles -->
-    <div class="fixed inset-0 pointer-events-none overflow-hidden">
-        {#each particles as particle}
-        <div
-            class="absolute rounded-full {particle.color}/40 particle"
-            style="
-                left: {particle.x}%;
-                top: {particle.y}%;
-                width: {particle.size}px;
-                height: {particle.size}px;
-                animation-delay: {particle.delay}s;
-            "
-        ></div>
-        {/each}
-    </div>
-
     <!-- Large background glow -->
     {#if showPrimary}
         <div 
-        class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-20 blur-3xl transition-opacity duration-1000 {colorClasses[result.primary.color]}"
+            class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full opacity-20 blur-3xl transition-opacity duration-1000 {colorClasses[result.primary.color]}"
         ></div>
     {/if}
 
