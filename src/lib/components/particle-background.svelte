@@ -13,19 +13,15 @@
     ];
 
     onMount(() => {
-        const newParticles = [];
-
-        for ( let i = 0; i < 100; i++ ) {
-            newParticles.push({
-                id          : i,
-                x           : Math.random() * 100,
-                y           : Math.random() * 100,
-                size        : Math.random() * 4 + 2,
-                delay       : Math.random() * 5,
-                duration    : Math.random() * 3 + 3,
-                color       : colors[Math.floor(Math.random() * colors.length)]
-            });
-        }
+        const newParticles = Array.from({ length: 100 }, () => ({
+            id          : Math.random(),
+            x           : Math.random() * 100,
+            y           : Math.random() * 100,
+            size        : Math.random() * 4 + 2,
+            delay       : Math.random() * 5,
+            duration    : Math.random() * 3 + 3,
+            color       : colors[Math.floor(Math.random() * colors.length)]
+        }) );
 
         particles = newParticles;
     });
