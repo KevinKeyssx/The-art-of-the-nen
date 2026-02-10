@@ -3,7 +3,8 @@
     import { page }     from '$app/state';
     import { goto }     from '$app/navigation';
 
-    import PulseButton from '$lib/components/buttons/pulse-button.svelte';
+    import PulseButton  from '$lib/components/buttons/pulse-button.svelte';
+    import BackIcon     from '$lib/components/icons/BackIcon.svelte';
 
 
     let { children } = $props();
@@ -190,7 +191,9 @@
     <!-- Botón Volver y Reproductor -->
     <div class="fixed top-4 left-4 right-4 mx-52 mt-10 z-50 flex items-center justify-between gap-4">
         <!-- Botón Volver -->
-        <PulseButton text="Volver" onClick={() => goto(returnTo)} />
+        <PulseButton text="Volver" onClick={() => goto(returnTo)} >
+            <BackIcon />
+        </PulseButton>
 
         <!-- Reproductor de Música -->
         {#if quizState !== 'intro'}
