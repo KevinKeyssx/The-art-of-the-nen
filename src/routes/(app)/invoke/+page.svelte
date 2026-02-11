@@ -1,7 +1,17 @@
 <script lang="ts">
-    import { onMount }          from 'svelte';
-    import { page }             from '$app/state';
+    import { onMount }  from 'svelte';
+    import { page }     from '$app/state';
 
+    import {
+        colorClasses,
+        textColorClasses,
+        borderColorClasses,
+        nenColorVars
+    }                           from '$lib/utils/nen-colors';
+    import {
+        playSound,
+        SOUND_FILES
+    }                           from '$lib/utils/player';
     import { NEN_TYPES }        from '$lib/data/nen-data';
     import { getFallbackHatsu } from '$lib/data/hatsu-data';
     import AuraFarm             from '$lib/components/loaders/aura-farm.svelte';
@@ -23,7 +33,6 @@
     let selectedTags    = $state<string[]>( [] );
     let retryCount      = $state( 0 );
     let loadingMessage  = $state( 'Canalizando tu Aura...' );
-    let showRevealPhase = $state( 0 );
     let loading         = $state( false );
     let hatsuResult     = $state<any>( null );
 
@@ -50,12 +59,15 @@
         selectedTags = selectedTags.includes( tagId )
             ? selectedTags.filter( t => t !== tagId )
             : [...selectedTags, tagId];
+
+        if ( selectedTags.includes( tagId )) {
+            playSound( SOUND_FILES.SELECTED, 0.1 );
+        }
     }
 
 
     function resetHatsuState() {
         pageState       = 'form';
-        showRevealPhase = 0;
         hatsuResult     = null;
         selectedTags    = [];
         userIdea        = '';
@@ -68,51 +80,9 @@
         }
     }
 
-
-    const colorClasses: Record<string, string> = {
-        'nen-int'   : 'bg-nen-int',
-        'nen-tra'   : 'bg-nen-tra',
-        'nen-mat'   : 'bg-nen-mat',
-        'nen-esp'   : 'bg-nen-esp',
-        'nen-man'   : 'bg-nen-man',
-        'nen-emi'   : 'bg-nen-emi'
-    };
-
-
-    const textColorClasses: Record<string, string> = {
-        'nen-int'   : 'text-nen-int',
-        'nen-tra'   : 'text-nen-tra',
-        'nen-mat'   : 'text-nen-mat',
-        'nen-esp'   : 'text-nen-esp',
-        'nen-man'   : 'text-nen-man',
-        'nen-emi'   : 'text-nen-emi'
-    };
-
-
-    const borderColorClasses: Record<string, string> = {
-        'nen-int'   : 'border-nen-int/50',
-        'nen-tra'   : 'border-nen-tra/50',
-        'nen-mat'   : 'border-nen-mat/50',
-        'nen-esp'   : 'border-nen-esp/50',
-        'nen-man'   : 'border-nen-man/50',
-        'nen-emi'   : 'border-nen-emi/50'
-    };
-
-
-    const nenColorVars: Record<string, string> = {
-        'nen-int'   : 'hsl(45 100% 50%)',
-        'nen-tra'   : 'hsl(280 80% 60%)',
-        'nen-mat'   : 'hsl(200 90% 55%)',
-        'nen-esp'   : 'hsl(330 85% 55%)',
-        'nen-man'   : 'hsl(140 70% 45%)',
-        'nen-emi'   : 'hsl(25 95% 55%)'
-    };
-
     // Función para invocar la habilidad usando Gemini AI
     async function generateAbility() {
-        if ( !primary || !secondary ) {
-            return;
-        }
+        if ( !primary || !secondary ) return;
 
         loading         = true;
         pageState       = 'invoking';
@@ -186,14 +156,7 @@
                 // Cambiar al estado revelado con animaciones escalonadas
                 setTimeout(() => {
                     pageState       = 'revealed';
-                    showRevealPhase = 1;
                 }, 2500 );
-
-                setTimeout(() => showRevealPhase = 2, 3200 );
-                setTimeout(() => showRevealPhase = 3, 4200 );
-                setTimeout(() => showRevealPhase = 4, 5200 );
-                setTimeout(() => showRevealPhase = 5, 6200 );
-                setTimeout(() => showRevealPhase = 6, 7200 );
             } else {
                 // Si aún así no hay resultado, volver al formulario
                 pageState = 'form';
@@ -253,8 +216,7 @@
             hatsuResult = JSON.parse( savedHatsu );
             // Si hay un hatsuResult guardado y el pageState es 'revealed', mostrar todo
             if ( savedPageState === 'revealed' ) {
-                pageState       = 'revealed';
-                showRevealPhase = 6; // Mostrar todas las fases
+                pageState = 'revealed';
             }
         }
 
@@ -413,126 +375,114 @@
 
             <div class="max-w-3xl mx-auto w-full relative z-10">
                 <!-- Phase 1: Ability Name + Kanji -->
-                {#if showRevealPhase >= 1}
-                    <div class="text-center mb-10 animate-energy-charge">
-                        <p class="text-sm {textColorClasses[primary.color]} mb-4 tracking-widest uppercase">Tu Hatsu ha sido revelado</p>
+                <div class="text-center mb-10 animate-slide-in-top animate-duration-1000 animate-delay-[50ms]">
+                    <p class="text-sm {textColorClasses[primary.color]} mb-4 tracking-widest uppercase">Tu Hatsu ha sido revelado</p>
 
-                        <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold {textColorClasses[primary.color]} mb-3" style="text-shadow: 0 0 40px {nenColorVars[primary.color]}, 0 0 80px {nenColorVars[primary.color]}40;">
-                            { hatsuResult.name }
-                        </h1>
+                    <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold {textColorClasses[primary.color]} mb-3" style="text-shadow: 0 0 40px {nenColorVars[primary.color]}, 0 0 80px {nenColorVars[primary.color]}40;">
+                        { hatsuResult.name }
+                    </h1>
 
-                        <!-- Kanji Name -->
-                        {#if hatsuResult.kanji_name}
-                            <p class="text-2xl {textColorClasses[primary.color]}/70 mb-4 font-light">
-                                {hatsuResult.kanji_name}
-                            </p>
-                        {/if}
+                    <!-- Kanji Name -->
+                    {#if hatsuResult.kanji_name}
+                        <p class="text-2xl {textColorClasses[primary.color]}/70 mb-4 font-light">
+                            {hatsuResult.kanji_name}
+                        </p>
+                    {/if}
 
-                        <div class="flex items-center justify-center gap-3 mt-4">
-                            <span class="px-3 py-1 text-xs rounded-full {colorClasses[primary.color]}/20 {textColorClasses[primary.color]} border {borderColorClasses[primary.color]}">
-                                { primary.name }
-                            </span>
+                    <div class="flex items-center justify-center gap-3 mt-4">
+                        <span class="px-3 py-1 text-xs rounded-full {colorClasses[primary.color]}/20 {textColorClasses[primary.color]} border {borderColorClasses[primary.color]}">
+                            { primary.name }
+                        </span>
 
-                            <span class="text-muted-foreground">+</span>
+                        <span class="text-muted-foreground">+</span>
 
-                            <span class="px-3 py-1 text-xs rounded-full {colorClasses[secondary.color]}/20 {textColorClasses[secondary.color]} border {borderColorClasses[secondary.color]}">
-                                { secondary.name }
-                            </span>
-                        </div>
+                        <span class="px-3 py-1 text-xs rounded-full {colorClasses[secondary.color]}/20 {textColorClasses[secondary.color]} border {borderColorClasses[secondary.color]}">
+                            { secondary.name }
+                        </span>
                     </div>
-                {/if}
+                </div>
 
                 <!-- Phase 2: Description -->
-                {#if showRevealPhase >= 2}
-                    <NenCard borderColor={primary.color} showGlow={true} class="mb-8 animate-fade-in-up">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-1 h-6 rounded-full {colorClasses[primary.color]}"></div>
-                            <h3 class="text-lg font-bold text-foreground">Descripción de la Habilidad</h3>
-                        </div>
+                <NenCard borderColor={primary.color} showGlow={true} class="mb-8 animate-delay-1000">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-1 h-6 rounded-full {colorClasses[primary.color]}"></div>
+                        <h3 class="text-lg font-bold text-foreground">Descripción de la Habilidad</h3>
+                    </div>
 
-                        <p class="text-foreground/90 leading-relaxed text-base">
-                            { hatsuResult.description }
-                        </p>
-                    </NenCard>
-                {/if}
+                    <p class="text-foreground/90 leading-relaxed text-base">
+                        { hatsuResult.description }
+                    </p>
+                </NenCard>
 
                 <!-- Phase 3: Combat Style -->
-                {#if showRevealPhase >= 3 && hatsuResult.combat_style}
-                    <NenCard borderColor={secondary.color} showGlow={true} class="mb-8 animate-fade-in-up">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-1 h-6 rounded-full {colorClasses[secondary.color]}"></div>
-                            <h3 class="text-lg font-bold text-foreground">Estilo de Combate</h3>
-                        </div>
+                <NenCard borderColor={secondary.color} showGlow={true} class="mb-8 animate-delay-2000">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-1 h-6 rounded-full {colorClasses[secondary.color]}"></div>
+                        <h3 class="text-lg font-bold text-foreground">Estilo de Combate</h3>
+                    </div>
 
-                        <p class="text-foreground/90 leading-relaxed">
-                            { hatsuResult.combat_style }
-                        </p>
-                    </NenCard>
-                {/if}
+                    <p class="text-foreground/90 leading-relaxed">
+                        { hatsuResult.combat_style }
+                    </p>
+                </NenCard>
 
                 <!-- Phase 4: Conditions and Vows -->
-                {#if showRevealPhase >= 4 && hatsuResult.conditions_and_vows}
-                    <NenCard borderColor="nen-esp" showGlow={false} class="mb-8 animate-fade-in-up">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-1 h-6 rounded-full bg-destructive"></div>
-                            <h3 class="text-lg font-bold text-foreground">Condiciones y Juramentos</h3>
-                        </div>
+                <NenCard borderColor="nen-esp" showGlow={false} class="mb-8 animate-delay-3000">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-1 h-6 rounded-full bg-destructive"></div>
+                        <h3 class="text-lg font-bold text-foreground">Condiciones y Juramentos</h3>
+                    </div>
 
-                        <div class="space-y-3">
-                            {#each hatsuResult.conditions_and_vows as condition, index}
-                                <div class="flex gap-3">
-                                    <span class="text-destructive font-bold text-sm mt-0.5">{index + 1}.</span>
+                    <div class="space-y-3">
+                        {#each hatsuResult.conditions_and_vows as condition, index}
+                            <div class="flex gap-3">
+                                <span class="text-destructive font-bold text-sm mt-0.5">{index + 1}.</span>
 
-                                    <p class="text-foreground/90 leading-relaxed flex-1">
-                                        { condition }
-                                    </p>
-                                </div>
-                            {/each}
-                        </div>
+                                <p class="text-foreground/90 leading-relaxed flex-1">
+                                    { condition }
+                                </p>
+                            </div>
+                        {/each}
+                    </div>
 
-                        <p class="text-sm text-muted-foreground mt-4 pt-4 border-t border-border">
-                            En el mundo del Nen, las restricciones más severas otorgan el mayor poder. Tus juramentos son el precio de tu fuerza.
-                        </p>
-                    </NenCard>
-                {/if}
+                    <p class="text-sm text-muted-foreground mt-4 pt-4 border-t border-border">
+                        En el mundo del Nen, las restricciones más severas otorgan el mayor poder. Tus juramentos son el precio de tu fuerza.
+                    </p>
+                </NenCard>
 
                 <!-- Phase 5: Usage Example -->
-                {#if showRevealPhase >= 5 && hatsuResult.usage_example}
-                    <NenCard borderColor={primary.color} showGlow={false} class="mb-8 animate-fade-in-up">
-                        <div class="flex items-center gap-2 mb-4">
-                            <div class="w-1 h-6 rounded-full bg-primary"></div>
+                <NenCard borderColor={primary.color} showGlow={false} class="mb-8 animate-delay-4000">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-1 h-6 rounded-full bg-primary"></div>
 
-                            <h3 class="text-lg font-bold text-foreground">Ejemplo de Uso en Combate</h3>
-                        </div>
+                        <h3 class="text-lg font-bold text-foreground">Ejemplo de Uso en Combate</h3>
+                    </div>
 
-                        <p class="text-foreground/90 leading-relaxed italic">
-                            { hatsuResult.usage_example }
-                        </p>
-                    </NenCard>
-                {/if}
+                    <p class="text-foreground/90 leading-relaxed italic">
+                        { hatsuResult.usage_example }
+                    </p>
+                </NenCard>
 
                 <!-- Phase 6: Actions -->
-                {#if showRevealPhase >= 6}
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up">
-                        <PulseButton
-                            text    = "Repetir el Test"
-                            onClick = { () => goto('/quiz') }
-                        >
-                            <RepeatIcon />
-                        </PulseButton>
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-down animate-duration-1000 animate-delay-5000">
+                    <PulseButton
+                        text    = "Repetir el Test"
+                        onClick = { () => goto('/quiz?quizState=intro') }
+                    >
+                        <RepeatIcon />
+                    </PulseButton>
 
-                        <AuraButton
-                            text            = "Invocar otra Habilidad"
-                            onclick         = { resetHatsuState }
-                            primaryColor    = { primary.color }
-                        />
+                    <AuraButton
+                        text            = "Invocar otra Habilidad"
+                        onclick         = { resetHatsuState }
+                        primaryColor    = { primary.color }
+                    />
 
-                        <GenerateButton
-                            onclick = { resetHatsuState }
-                            text    = "Explorar más sobre el Nen"
-                        />
-                    </div>
-                {/if}
+                    <GenerateButton
+                        onclick = { resetHatsuState }
+                        text    = "Explorar más sobre el Nen"
+                    />
+                </div>
             </div>
         </div>
     {/if}
