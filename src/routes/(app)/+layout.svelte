@@ -3,8 +3,9 @@
     import { page }     from '$app/state';
     import { goto }     from '$app/navigation';
 
-    import PulseButton  from '$lib/components/buttons/pulse-button.svelte';
-    import BackIcon     from '$lib/components/icons/BackIcon.svelte';
+    import PulseButton      from '$lib/components/buttons/pulse-button.svelte';
+    import BackIcon         from '$lib/components/icons/BackIcon.svelte';
+    import { SOUND_FILES }  from '$lib/utils/player';
 
 
     let { children } = $props();
@@ -27,8 +28,8 @@
 
     const getAudioSrc = ( pathname: string ): string =>
         pathname.includes( '/invoke' )
-            ? `/sounds/invoke/invoke-${Math.floor( Math.random() * 10 ) + 1}.ogg`
-            : '/sounds/background.mp3';
+            ? `${SOUND_FILES.INVOKE.replace('*', `${Math.floor( Math.random() * 10 ) + 1}`)}`
+            : SOUND_FILES.BACKGROUND;
 
     // Inicializar audio
     onMount(() => {
@@ -57,38 +58,45 @@
             '/invoke'   : '/quiz',
         }[pathname] || '/';
 
-        if ( audio ) {
-            const newSrc = getAudioSrc( pathname );
+        if ( !audio ) return;
 
-            if ( newSrc !== currentSrc ) {
-                const wasPlaying = isPlaying;
+        const query = window.location.href.split('?')[1];
 
-                audio.pause();
-                audio.src       = newSrc;
-                audio.volume    = volume;
-                audio.loop      = true;
-                audio.muted     = isMuted;
-                currentSrc      = newSrc;
+        if ( query === 'quizState=intro' ) {
+            audio.pause();
+            return;
+        }
 
-                if ( wasPlaying ) {
-                    audio.play().catch( err => console.error( 'Error al reproducir:', err ));
-                }
+        const newSrc = getAudioSrc( pathname );
+
+        if ( newSrc !== currentSrc ) {
+            const wasPlaying = isPlaying;
+
+            audio.pause();
+            audio.src       = newSrc;
+            audio.volume    = volume;
+            audio.loop      = true;
+            audio.muted     = isMuted;
+            currentSrc      = newSrc;
+
+            if ( wasPlaying ) {
+                audio.play().catch( err => console.error( 'Error al reproducir:', err ));
             }
+        }
 
-            // Reproducir automáticamente cuando quizState sea 'quiz' (solo la primera vez)
-            if ( quizState === 'quiz' && !isPlaying && !hasAutoPlayed && !userPaused ) {
-                audio.play()
-                    .then(() => {
-                        isPlaying       = true;
-                        hasAutoPlayed   = true;
-                    })
-                    .catch( err => console.error( 'Error al reproducir:', err ));
-            }
+        // Reproducir automáticamente cuando quizState sea 'quiz' (solo la primera vez)
+        if ( quizState === 'quiz' && !isPlaying && !hasAutoPlayed && !userPaused ) {
+            audio.play()
+                .then(() => {
+                    isPlaying       = true;
+                    hasAutoPlayed   = true;
+                })
+                .catch( err => console.error( 'Error al reproducir:', err ));
+        }
 
-            // Resetear hasAutoPlayed cuando se sale del estado 'quiz'
-            if ( quizState !== 'quiz' ) {
-                hasAutoPlayed = false;
-            }
+        // Resetear hasAutoPlayed cuando se sale del estado 'quiz'
+        if ( quizState !== 'quiz' ) {
+            hasAutoPlayed = false;
         }
     });
 
