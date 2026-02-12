@@ -43,3 +43,14 @@ export const nenColorVars: Record<string, string> = {
     'nen-man': '#22c55e', // green-500
     'nen-emi': '#f97316'  // orange-500
 };
+
+
+export const glowClasses: Record<string, string> = {
+    'nen-int'   : 'glow-nen-int',
+    'nen-tra'   : 'glow-nen-tra',
+    'nen-mat'   : 'glow-nen-mat',
+    'nen-esp'   : 'glow-nen-esp',
+    'nen-man'   : 'glow-nen-man',
+    'nen-emi'   : 'glow-nen-emi'
+};
+
