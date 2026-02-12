@@ -12,9 +12,14 @@
         Legend
     } from 'chart.js';
 
+    import {
+        colorClasses,
+        nenColorVars,
+        textColorClasses
+    }                           from "$lib/utils/nen-colors";
     import NenCard              from "$lib/components/cards/nen-card.svelte";
-    import { colorClasses, nenColorVars, textColorClasses }     from "$lib/utils/nen-colors";
     import type { NenResult }   from '$lib/models/nen';
+    import { capitalize }       from "$lib/utils/strings";
 
 
     Chart.register(
@@ -38,10 +43,12 @@
         setTimeout(() => {
             if ( !chartCanvas ) return;
 
+            const isMobile      = window.innerWidth < 768;
             const dataOrder     = [ 'INT', 'TRA', 'MAT', 'ESP', 'MAN', 'EMI' ];
             const data          = dataOrder.map( code => result.scores[code] || 0 );
             const baseLabels    = [ 'Intensificación', 'Transmutación', 'Materialización', 'Especialización', 'Manipulación', 'Emisión' ];
-            const labels        = baseLabels.map(( name, i ) => `${name} (${data[i]})` );
+            const labelsToShow  = isMobile ? dataOrder.map( code =>  capitalize( code )) : baseLabels;
+            const labels        = labelsToShow.map(( name, i ) => `${name} (${data[i]})` );
             const primaryColor  = result.primary.color;
 
             // Array de colores correspondiente al orden de los datos
@@ -97,7 +104,6 @@
                                 color: (context) => pointColors[context.index],
                                 font: {
                                     size: 13,
-                                    family: "'Arial', sans-serif",
                                     weight: 'bold'
                                 },
                                 backdropPadding: 10
@@ -151,10 +157,13 @@
 >
     <div class="flex items-center gap-2 mb-4">
         <div class="w-1 h-6 rounded-full {colorClasses[result.primary.color]}"></div>
-        <h3 class="text-lg font-bold {textColorClasses[result.primary.color]}">Afinidad de tu Aura</h3>
+
+        <h3 class="text-lg font-bold {textColorClasses[result.primary.color]}">
+            Afinidad de tu Aura
+        </h3>
     </div>
 
-    <div class="relative w-full h-[300px] sm:h-[400px] flex items-center justify-center">
+    <div class="flex relative w-full h-[300px] sm:h-[400px] items-center justify-center">
         <canvas bind:this={chartCanvas}></canvas>
     </div>
 </NenCard>
