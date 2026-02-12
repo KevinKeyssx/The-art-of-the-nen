@@ -110,24 +110,51 @@
 
         isGenerating = true;
 
-        try {
-            // Aseguramos carga de fuentes o estilos
-            await new Promise( resolve => setTimeout( resolve, 500 ));
+        const isMobile      = window.innerWidth < 1024;
+        const originalStyle = elementToCapture.style.cssText;
 
-            const dataUrl = await toPng( elementToCapture, { 
-                cacheBust       : true,
-                backgroundColor : '#0c0e12',
-                pixelRatio      : 2, // Mejor calidad
+        let elementStyle: any = { 
+            cacheBust       : true,
+            backgroundColor : '#0c0e12',
+            pixelRatio      : 2,
+            style           : {
+                transform: 'scale(1)',
+            }
+        }
+
+        if ( isMobile ) {
+            elementToCapture.style.width    = '800px'; 
+            elementToCapture.style.position = 'fixed';
+            elementToCapture.style.top      = '0';
+            elementToCapture.style.left     = '0';
+            elementToCapture.style.zIndex   = '-1';
+            elementToCapture.style.padding  = '40px'
+
+            elementStyle = { 
+                ...elementStyle,
+                width           : 800,
                 style           : {
                     transform: 'scale(1)',
+                    width: '800px',
+                    height: 'auto'
                 }
-            });
+            }
+        }
+
+        try {
+            await new Promise( resolve => setTimeout( resolve, 500 ));
+
+            const dataUrl = await toPng( elementToCapture, elementStyle );
 
             generatedImage = dataUrl;
         } catch ( error ) {
             console.error('Error generando la imagen:', error);
         } finally {
             isGenerating = false;
+
+            if ( isMobile ) {
+                elementToCapture.style.cssText = originalStyle;
+            }
         }
     }
 </script>
