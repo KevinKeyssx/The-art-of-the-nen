@@ -31,7 +31,7 @@
 </script>
 
 <div 
-    class="p-8 rounded-2xl border {borderColorClasses[borderColor]} {showGlow ? glowClasses[borderColor] : ''} relative overflow-hidden backdrop-blur-xs {animate} {duration} {delay} {className}"
+    class="p-6 md:p-8 rounded-2xl border {borderColorClasses[borderColor]} {showGlow ? glowClasses[borderColor] : ''} relative overflow-hidden backdrop-blur-xs {animate} {duration} {delay} {className}"
     style="background: linear-gradient( 135deg, {currentColor}03, {currentColor}08, {currentColor}03 );"
 >
     {#if showGlow}
