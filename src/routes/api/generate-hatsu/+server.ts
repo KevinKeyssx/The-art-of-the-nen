@@ -4,6 +4,9 @@ import { GoogleGenerativeAI, SchemaType } from '@google/generative-ai';
 
 import { GEMINI_API_KEY, NEN_AI_MODEL } from '$env/static/private';
 
+import { COMBAT_TAGS } from '$lib/data/combat-data';
+import { NEN_TYPE_MAP } from '$lib/data/nen-type';
+
 
 export async function POST({ request }: { request: Request }) {
     try {
@@ -13,14 +16,50 @@ export async function POST({ request }: { request: Request }) {
             secondaryType, 
             personalitySummary, 
             combatPreference, 
-            userInputIdea 
+            userInputIdea,
+            selectedTags = []
         } = body as {
             primaryType         : string;
             secondaryType       : string;
             personalitySummary  : string;
             combatPreference    : string;
             userInputIdea       : string;
+            selectedTags?       : string[];
         };
+
+        // Obtener códigos de tipos (asumiendo que vienen como "Intensificación", etc.)
+        const primaryCode   = Object.keys( NEN_TYPE_MAP ).find( key => NEN_TYPE_MAP[key] === primaryType ) || 'INT';
+        const secondaryCode = Object.keys( NEN_TYPE_MAP ).find( key => NEN_TYPE_MAP[key] === secondaryType ) || 'EMI';
+
+        // Validar tags seleccionados
+        const savedTags: string[] = [];
+
+        for ( const tagId of selectedTags ) {
+            const tag = COMBAT_TAGS.find( t => t.id === tagId );
+            if ( !tag ) continue;
+
+            const isForbiddenByPrimary  = tag.forbiddenTypes.includes( primaryCode );
+            const isSavedBySecondary    = tag.compatibleTypes.includes( secondaryCode );
+
+            // Si está prohibido por el primario y NO salvado por el secundario, es inválido
+            if ( isForbiddenByPrimary && !isSavedBySecondary ) {
+                return json({ 
+                    error: `El estilo "${tagId}" no es compatible con tu tipo de Nen` 
+                }, { status: 400 });
+            }
+
+            // Si fue salvado por el secundario, agregarlo a la lista
+            if ( isForbiddenByPrimary && isSavedBySecondary ) {
+                savedTags.push( tagId );
+            }
+        }
+
+        // Validar que no haya más de 2 tags salvados
+        if ( savedTags.length > 2 ) {
+            return json({ 
+                error: 'No puedes seleccionar más de 2 estilos salvados por tu tipo secundario' 
+            }, { status: 400 });
+        }
 
         const genAI = new GoogleGenerativeAI( GEMINI_API_KEY );
 
@@ -48,6 +87,17 @@ export async function POST({ request }: { request: Request }) {
             }
         });
 
+        // Construir advertencia sobre tags salvados
+        const savedTagsWarning = savedTags.length > 0
+            ? `\n\n⚠️ IMPORTANTE: El usuario ha seleccionado ${savedTags.length} estilo(s) de combate que NO son naturales para su tipo principal (${primaryType}), pero son viables gracias a su tipo secundario (${secondaryType}). Estos estilos son: ${savedTags.join(', ')}. 
+
+            DEBES ser MÁS ESTRICTO con las "Condiciones y Juramentos":
+            - La habilidad será MENOS eficiente que si fuera del tipo principal
+            - DEBE tener al menos ${savedTags.length + 1} condiciones/restricciones severas
+            - Las condiciones deben reflejar la dificultad de usar un estilo no natural
+            - Menciona explícitamente en la descripción que esta habilidad requiere gran control de aura debido a la incompatibilidad con su tipo principal`
+            : '';
+
         const prompt = `
             Actúa como un Maestro de Nen experto de Hunter x Hunter. 
             Tu tarea es crear una habilidad especial (Hatsu) ÚNICA para un estudiante basándote en su perfil.
@@ -60,6 +110,7 @@ export async function POST({ request }: { request: Request }) {
             (En la idea del usuario si escribe otra cosa que no sea Nen, ignóralo y crea una habilidad Nen.
             Tienes prohíbido hacer, contestar o crear cualquier cosa que no tenga que ver con Nen o habilidades Nen.)
             - Idea del Usuario: "${userInputIdea}" (Toma esto como base principal e inspiración)
+            ${savedTagsWarning}
 
             REGLAS DE CREACIÓN:
             1. La habilidad debe ser 100% coherente con el Tipo Principal del estudiante.
