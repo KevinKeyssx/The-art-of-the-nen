@@ -11,25 +11,34 @@
     let { children } = $props();
 
     // Estado del reproductor de música
-    let audio           : HTMLAudioElement | null = null;
-    let isPlaying       = $state( false );
-    let volume          = $state( 0.8 );
-    let isMuted         = $state( false );
-    let currentSrc      = $state( '' );
-    let returnTo        = $state( '/' );
-    let hasAutoPlayed   = $state( false );
-    let userPaused      = $state( false );
-    let isDragging      = $state( false );
-    let sliderRef       = $state<HTMLInputElement | null>( null );
+    let audio               : HTMLAudioElement | null = null;
+    let isPlaying           = $state( false );
+    let volume              = $state( 0.8 );
+    let isMuted             = $state( false );
+    let currentSrc          = $state( '' );
+    let returnTo            = $state( '/' );
+    let hasAutoPlayed       = $state( false );
+    let userPaused          = $state( false );
+    let isDragging          = $state( false );
+    let sliderRef           = $state<HTMLInputElement | null>( null );
+    let isMobilePlayerOpen  = $state( false );
 
 
     const quizState = $derived( page.url.searchParams.get( 'quizState' ) || '' );
 
 
-    const getAudioSrc = ( pathname: string ): string =>
-        pathname.includes( '/invoke' )
-            ? `${SOUND_FILES.INVOKE.replace('*', `${Math.floor( Math.random() * 10 ) + 1}`)}`
-            : SOUND_FILES.BACKGROUND;
+    const getAudioSrc = ( pathname: string ): string => {
+        if ( pathname.includes( '/invoke' ) ) {
+            // Si ya estamos reproduciendo una canción de invoke, mantenerla
+            if ( currentSrc && currentSrc !== SOUND_FILES.BACKGROUND ) {
+                return currentSrc;
+            }
+
+            return `${SOUND_FILES.INVOKE.replace('*', `${Math.floor( Math.random() * 10 ) + 1}`)}`;
+        }
+
+        return SOUND_FILES.BACKGROUND;
+    };
 
     // Inicializar audio
     onMount(() => {
@@ -192,20 +201,25 @@
             window.removeEventListener( 'mousemove', handleSliderMouseMove );
             window.removeEventListener( 'mouseup', handleSliderMouseUp );
         };
-    });</script>
+    });
+</script>
 
 
 <div class="min-h-screen relative">
     <!-- Botón Volver y Reproductor -->
-    <div class="fixed top-4 left-4 right-4 mx-52 mt-10 z-50 flex items-center justify-between gap-4">
+    <div class="fixed bottom-4 md:bottom-auto md:top-4 left-4 right-4 mx-2 lg:mx-32 xl:mx-10 2xl:mx-20 @max-3xl:mx-96 mt-10 z-50 flex items-center justify-between gap-4">
         <!-- Botón Volver -->
-        <PulseButton text="Volver" onClick={() => goto(returnTo)} >
+        <!-- text="Volver" -->
+        <PulseButton
+            onClick={() => goto(returnTo)}
+        >
             <BackIcon />
+            <span class="hidden lg:block">Volver</span>
         </PulseButton>
 
         <!-- Reproductor de Música -->
         {#if quizState !== 'intro'}
-            <div class="bg-card/90 backdrop-blur-md border-2 border-primary/30 rounded-xl p-3 shadow-2xl shadow-primary/20 min-w-[320px]">
+            <div class="bg-card/90 backdrop-blur-md border-2 border-primary/30 rounded-xl p-3 shadow-2xl shadow-primary/20 min-w-[320px] hidden 2xl:block animate-fade-in-left">
                 <div class="flex items-center gap-4">
                     <!-- Botón Play/Pause -->
                     <button
@@ -295,6 +309,97 @@
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="block 2xl:hidden relative animate-fade-in-left">
+                <!-- Botón Toggle Móvil -->
+                <button
+                    onclick={() => isMobilePlayerOpen = !isMobilePlayerOpen}
+                    class="w-10 h-10 rounded-full bg-card/80 backdrop-blur-md border border-primary/30 flex items-center justify-center text-primary shadow-lg transition-all active:scale-95"
+                    aria-label={isMobilePlayerOpen ? 'Cerrar reproductor' : 'Abrir reproductor'}
+                >
+                    {#if isMobilePlayerOpen}
+                        <!-- X Icon -->
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    {:else}
+                        <!-- Music Icon -->
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3"/>
+                        </svg>
+                    {/if}
+                </button>
+
+                <!-- Menú Desplegable Móvil -->
+                {#if isMobilePlayerOpen}
+                    <div class="absolute bottom-14 right-0 md:top-12 md:bottom-auto bg-card/90 backdrop-blur-xl border border-primary/20 rounded-xl p-4 shadow-2xl w-64 animate-fade-in-up md:animate-fade-in-down origin-bottom-right md:origin-top-right z-50">
+                        <div class="flex flex-col gap-4">
+                            <!-- Título / Info -->
+                            <div class="text-center">
+                                <span class="text-xs text-muted-foreground uppercase tracking-widest font-semibold">Reproductor Nen</span>
+                            </div>
+
+                            <!-- Botón Play Central -->
+                            <div class="flex justify-center">
+                                <button
+                                    onclick={togglePlay}
+                                    class="w-14 h-14 rounded-full bg-linear-to-br from-primary/20 to-primary/10 border-2 border-primary/50 flex items-center justify-center shadow-lg shadow-primary/20 active:scale-95 transition-transform"
+                                >
+                                    {#if isPlaying}
+                                        <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+                                        </svg>
+                                    {:else}
+                                        <svg class="w-6 h-6 text-primary ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                            <path d="M8 5v14l11-7z"/>
+                                        </svg>
+                                    {/if}
+                                </button>
+                            </div>
+
+                            <!-- Volumen -->
+                            <div class="bg-secondary/30 rounded-lg p-3">
+                                <div class="flex items-center gap-3">
+                                    <button
+                                        onclick={toggleMute}
+                                        class="text-primary/70 hover:text-primary transition-colors p-1"
+                                    >
+                                        {#if isMuted || volume === 0}
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
+                                            </svg>
+                                        {:else}
+                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                                <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/>
+                                            </svg>
+                                        {/if}
+                                    </button>
+
+                                    <div class="flex-1 flex flex-col gap-1">
+                                        <input
+                                            type="range"
+                                            min="0"
+                                            max="1"
+                                            step="0.01"
+                                            value={volume}
+                                            oninput={handleVolumeChange}
+                                            class="w-full h-2 rounded-full appearance-none bg-background/50 cursor-pointer
+                                                [&::-webkit-slider-thumb]:appearance-none
+                                                [&::-webkit-slider-thumb]:w-4
+                                                [&::-webkit-slider-thumb]:h-4
+                                                [&::-webkit-slider-thumb]:rounded-full
+                                                [&::-webkit-slider-thumb]:bg-primary
+                                                [&::-webkit-slider-thumb]:shadow-md"
+                                        />
+                                    </div>
+
+                                    <span class="text-xs font-mono text-primary/80 w-8 text-right">{Math.round(volume * 100)}%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {/if}
             </div>
         {/if}
     </div>
