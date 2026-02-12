@@ -197,7 +197,7 @@
 <Share
     { showShareDialog }
     { shareText }
-    imageName       = { `hatsu-${primary.name}` }
+    imageName       = { `hatsu-${hatsuResult.name.toLowerCase()}` }
     onclick         = { toggleShareDialog }
     shareElementId  = { shareCardId }
 />
