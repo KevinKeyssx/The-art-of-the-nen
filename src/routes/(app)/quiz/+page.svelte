@@ -1,7 +1,15 @@
 <script lang="ts">
     import { onMount }  from 'svelte';
     import { goto }     from '$app/navigation';
+    import { page }     from '$app/state';
 
+    import {
+        clearLocalStorage,
+        getLocalStorage,
+        LOCAL_STORAGE_KEYS,
+        removeLocalStorage,
+        setLocalStorage
+    }                   from '$lib/utils/local-storage';
     import {
         getRandomQuestions,
         calculateNenResult,
@@ -10,16 +18,22 @@
         playSound,
         SOUND_FILES
     }                   from '$lib/utils/player';
-    import QuizResult   from '$lib/components/quiz/result/quiz-result.svelte';
-    import Intro        from '$lib/components/quiz/intro/Intro.svelte';
-    import QuizForm     from '$lib/components/quiz/form/QuizForm.svelte';
-    import Calculating  from '$lib/components/quiz/calculating/Calculating.svelte';
-
-
-    let isSoundEffectMuted  = $state( false );
+    import QuizResult   from './components/result/quiz-result.svelte';
+    import Intro        from './components/Intro.svelte';
+    import QuizForm     from './components/QuizForm.svelte';
+    import Calculating  from './components/Calculating.svelte';
 
 
     type QuizState = 'intro' | 'quiz' | 'calculating' | 'result';
+
+
+    let { data } = $props();
+
+
+    let quizState           = $state<QuizState>('intro');
+    let questions           = $state( getQuestionsWithShuffledOptions() );
+    let result              = $state<ReturnType<typeof calculateNenResult> | null>( null );
+    let isSoundEffectMuted  = $state( false );
 
     // Mapeo de estados a archivos de sonido
     const stateSounds: Partial<Record<QuizState, string>> = {
@@ -35,6 +49,18 @@
             playSound( soundFile, 0.3 );
         }
     });
+
+    // Sincronizar el quizState con la URL (Igual que en Invoke)
+    $effect(() => {
+        const currentState = page.url.searchParams.get( 'quizState' );
+
+        if ( currentState !== quizState ) {
+            const url = new URL( window.location.href );
+            url.searchParams.set( 'quizState', quizState );
+            goto( url.toString(), { replaceState: true, noScroll: true });
+        }
+    });
+
 
     // Funcion para mezclar array (Fisher-Yates shuffle)
     function shuffleArray<T>( array: T[] ): T[] {
@@ -59,16 +85,12 @@
     }
 
 
-    let { data }                = $props();
-    let quizState               = $state<QuizState>('intro');
-    let questions               = $state( getQuestionsWithShuffledOptions() );
-    let result                  = $state<ReturnType<typeof calculateNenResult> | null>( null );
-
-
     function startQuiz() {
-        questions               = getQuestionsWithShuffledOptions();
-        result                  = null;
-        quizState               = 'quiz';
+        removeLocalStorage( LOCAL_STORAGE_KEYS.NEN_QUIZ_RESULT );
+
+        questions   = getQuestionsWithShuffledOptions();
+        result      = null;
+        quizState   = 'quiz';
 
         // Actualizar URL con el estado del quiz para que el layout lo detecte
         const url = new URL( window.location.href );
@@ -78,8 +100,10 @@
 
 
     function restartQuiz() {
-        quizState       = 'intro';
-        result          = null;
+        clearLocalStorage();
+
+        quizState   = 'intro';
+        result      = null;
 
         const url = new URL( window.location.href );
         url.searchParams.delete( 'quizState' );
@@ -88,9 +112,34 @@
 
 
     onMount(() => {
-        const url = new URL( window.location.href );
-        url.searchParams.set( 'quizState', 'intro' );
-        goto( url.toString(), { replaceState: true, noScroll: true });
+        const savedResult = getLocalStorage( LOCAL_STORAGE_KEYS.NEN_QUIZ_RESULT );
+
+        if ( savedResult ) {
+            try {
+                result      = savedResult;
+                quizState   = 'result';
+                return;
+            } catch ( error ) {
+                console.error( 'Error parsing saved result', error );
+                removeLocalStorage( LOCAL_STORAGE_KEYS.NEN_QUIZ_RESULT );
+            }
+        }
+
+        const urlParams = new URLSearchParams( window.location.search );
+        const savedState = urlParams.get( 'quizState' );
+
+        if ( !savedState ) {
+            quizState = 'intro';
+        } else if ( savedState === 'quiz' ) {
+            quizState = 'intro';
+        }
+    });
+
+
+    $effect(() => {
+        if ( result ) {
+            setLocalStorage( LOCAL_STORAGE_KEYS.NEN_QUIZ_RESULT, result );
+        }
     });
 </script>
 
@@ -115,7 +164,7 @@
 </svelte:head>
 
 
-<div class="min-h-screen bg-background relative overflow-hidden">
+<main class="min-h-screen bg-background relative overflow-hidden">
     <!-- Intro State -->
     {#if quizState === 'intro'}
         <Intro startQuiz={startQuiz} />
@@ -147,4 +196,4 @@
     {#if quizState === 'result' && result}
         <QuizResult {result} onRestart={restartQuiz} />
     {/if}
-</div>
+</main>
