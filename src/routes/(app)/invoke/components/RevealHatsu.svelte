@@ -6,14 +6,18 @@
         colorClasses,
         nenColorVars,
         textColorClasses
-    }                               from "$lib/utils/nen-colors";
-    import AuraButton               from "$lib/components/buttons/aura-button.svelte";
-    import PulseButton              from "$lib/components/buttons/pulse-button.svelte";
-    import NenCard                  from "$lib/components/cards/nen-card.svelte";
-    import RepeatIcon               from "$lib/components/icons/RepeatIcon.svelte";
-    import ShareButton              from "$lib/components/buttons/share-button.svelte";
-    import Share                    from "$lib/components/Share.svelte";
-    import { clearLocalStorage, LOCAL_STORAGE_KEYS, removeLocalStorage }    from "$lib/utils/local-storage";
+    }                       from "$lib/utils/nen-colors";
+    import {
+        clearLocalStorage,
+        LOCAL_STORAGE_KEYS,
+        removeLocalStorage
+    }                       from "$lib/utils/local-storage";
+    import AuraButton       from "$lib/components/buttons/aura-button.svelte";
+    import PulseButton      from "$lib/components/buttons/pulse-button.svelte";
+    import NenCard          from "$lib/components/cards/nen-card.svelte";
+    import RepeatIcon       from "$lib/components/icons/RepeatIcon.svelte";
+    import ShareButton      from "$lib/components/buttons/share-button.svelte";
+    import Share            from "$lib/components/Share.svelte";
 
 
     let {
@@ -37,7 +41,6 @@
         hatsuResult = null;
 
         // Limpiar localStorage
-        // clearLocalStorage();
         removeLocalStorage( LOCAL_STORAGE_KEYS.NEN_HATSU_RESULT );
         removeLocalStorage( LOCAL_STORAGE_KEYS.NEN_HATSU_SELECTED );
         removeLocalStorage( LOCAL_STORAGE_KEYS.NEN_HATSU_IDEA );
@@ -66,9 +69,23 @@
                     Tu Hatsu ha sido revelado
                 </p>
 
-                <h1 class="text-4xl sm:text-5xl md:text-6xl font-bold {textColorClasses[primary.color]} mb-3 animate-blurred-fade-in animate-duration-4000" style="text-shadow: 0 0 40px {nenColorVars[primary.color]}, 0 0 80px {nenColorVars[primary.color]}40;">
-                    { hatsuResult.name }
-                </h1>
+                <div class="relative inline-block">
+                    <!-- Capa de glow/shadow de fondo -->
+                    <h1
+                        class="absolute inset-0 text-4xl sm:text-5xl md:text-6xl font-bold mb-3 animate-blurred-fade-in animate-duration-4000 {textColorClasses[primary.color]} blur-sm opacity-80"
+                        style="text-shadow: 0 0 40px {nenColorVars[primary.color]}, 0 0 80px {nenColorVars[primary.color]}40;"
+                    >
+                        { hatsuResult.name }
+                    </h1>
+
+                    <!-- Capa de texto con gradiente -->
+                    <h1
+                        class="relative text-4xl sm:text-5xl md:text-6xl font-bold mb-3 animate-blurred-fade-in animate-duration-4000 text-transparent bg-clip-text"
+                        style="background-image: linear-gradient(to right, {nenColorVars[primary.color]}, {nenColorVars[secondary.color]});"
+                    >
+                        { hatsuResult.name }
+                    </h1>
+                </div>
 
                 <!-- Kanji Name -->
                 {#if hatsuResult.kanji_name}
