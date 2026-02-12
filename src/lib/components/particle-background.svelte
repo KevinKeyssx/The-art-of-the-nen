@@ -13,7 +13,9 @@
     ];
 
     onMount(() => {
-        const newParticles = Array.from({ length: 200 }, () => ({
+        const particleCount = window.innerWidth < 768 ? 100 : 200;
+
+        const newParticles = Array.from({ length: particleCount }, () => ({
             id          : Math.random(),
             x           : Math.random() * 100,
             y           : Math.random() * 100,
