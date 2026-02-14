@@ -172,10 +172,11 @@
         <!-- Phase 6: Actions -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-down animate-duration-1000 animate-delay-7000">
             <PulseButton
-                onClick = { resetAllNenState }
-                className = " w-60 md:w-32 lg:w-52"
+                onClick     = { resetAllNenState }
+                className   = " w-60 sm:w-32 lg:w-52"
             >
                 <RepeatIcon />
+
                 <span class="block sm:hidden lg:block">Repetir el Test</span>
             </PulseButton>
 
