@@ -209,7 +209,7 @@
 
 <div class="min-h-screen relative">
     <!-- Botón Volver y Reproductor -->
-    <div class="fixed bottom-4 md:bottom-auto md:top-4 left-4 right-4 mx-2 lg:mx-32 xl:mx-10 2xl:mx-20 @max-3xl:mx-96 mt-10 z-50 flex items-center justify-between gap-4">
+    <div class="fixed left-4 right-4 mx-2 lg:mx-32 xl:mx-10 2xl:mx-20 @max-3xl:mx-96 mt-10 z-50 flex items-center justify-between gap-4">
         <!-- Botón Volver -->
         <PulseButton
             onClick={() => goto(returnTo)}
