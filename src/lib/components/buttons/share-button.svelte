@@ -13,8 +13,12 @@
 <button onclick={share}>
     <p class="flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-share"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3 12a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M15 6a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M15 18a3 3 0 1 0 6 0a3 3 0 1 0 -6 0" /><path d="M8.7 10.7l6.6 -3.4" /><path d="M8.7 13.3l6.6 3.4" /></svg>
-       {text}
+
+        <span class="sm:hidden md:flex">
+            {text}
+        </span>
     </p>
+
     <div class="star-1">
         <svg
         xmlns="http://www.w3.org/2000/svg"
@@ -104,160 +108,155 @@
 
 <style>
     button {
-    position      : relative;
-    padding       : 12px 35px;
-    background    : #0a0a0f;
-    font-size     : 15px;
-    font-weight   : 500;
-    color         : #fff;
-    border        : 2px solid rgba(168, 85, 247, 0.4);
-    border-radius : 10px;
-    box-shadow    : 0 0 0 rgba(168, 85, 247, 0.3);
-    transition    : all 0.3s ease-in-out;
-    cursor        : pointer;
+        position      : relative;
+        padding       : 12px 35px;
+        background    : #0a0a0f;
+        font-size     : 15px;
+        font-weight   : 500;
+        color         : #fff;
+        border        : 2px solid rgba(168, 85, 247, 0.4);
+        border-radius : 10px;
+        box-shadow    : 0 0 0 rgba(168, 85, 247, 0.3);
+        transition    : all 0.3s ease-in-out;
+        cursor        : pointer;
     }
 
     .star-1 {
-    position      : absolute;
-    top           : 20%;
-    left          : 20%;
-    width         : 25px;
-    height        : auto;
-    filter        : drop-shadow(0 0 0 rgba(168, 85, 247, 0.5));
-    z-index       : -5;
-    transition    : all 1s cubic-bezier(0.05, 0.83, 0.43, 0.96);
-    color         : rgba(168, 85, 247, 0.6);
+        position      : absolute;
+        top           : 20%;
+        left          : 20%;
+        width         : 25px;
+        height        : auto;
+        filter        : drop-shadow(0 0 0 rgba(168, 85, 247, 0.5));
+        z-index       : -5;
+        transition    : all 1s cubic-bezier(0.05, 0.83, 0.43, 0.96);
+        color         : rgba(168, 85, 247, 0.6);
     }
 
     .star-2 {
-    position      : absolute;
-    top           : 45%;
-    left          : 45%;
-    width         : 15px;
-    height        : auto;
-    filter        : drop-shadow(0 0 0 rgba(236, 72, 153, 0.5));
-    z-index       : -5;
-    transition    : all 1s cubic-bezier(0, 0.4, 0, 1.01);
-    color         : rgba(236, 72, 153, 0.6);
+        position      : absolute;
+        top           : 45%;
+        left          : 45%;
+        width         : 15px;
+        height        : auto;
+        filter        : drop-shadow(0 0 0 rgba(236, 72, 153, 0.5));
+        z-index       : -5;
+        transition    : all 1s cubic-bezier(0, 0.4, 0, 1.01);
+        color         : rgba(236, 72, 153, 0.6);
     }
 
     .star-3 {
-    position      : absolute;
-    top           : 40%;
-    left          : 40%;
-    width         : 5px;
-    height        : auto;
-    filter        : drop-shadow(0 0 0 rgba(168, 85, 247, 0.5));
-    z-index       : -5;
-    transition    : all 1s cubic-bezier(0, 0.4, 0, 1.01);
-    color         : rgba(168, 85, 247, 0.6);
+        position      : absolute;
+        top           : 40%;
+        left          : 40%;
+        width         : 5px;
+        height        : auto;
+        filter        : drop-shadow(0 0 0 rgba(168, 85, 247, 0.5));
+        z-index       : -5;
+        transition    : all 1s cubic-bezier(0, 0.4, 0, 1.01);
+        color         : rgba(168, 85, 247, 0.6);
     }
 
     .star-4 {
-    position      : absolute;
-    top           : 20%;
-    left          : 40%;
-    width         : 8px;
-    height        : auto;
-    filter        : drop-shadow(0 0 0 rgba(236, 72, 153, 0.5));
-    z-index       : -5;
-    transition    : all 0.8s cubic-bezier(0, 0.4, 0, 1.01);
-    color         : rgba(236, 72, 153, 0.6);
+        position      : absolute;
+        top           : 20%;
+        left          : 40%;
+        width         : 8px;
+        height        : auto;
+        filter        : drop-shadow(0 0 0 rgba(236, 72, 153, 0.5));
+        z-index       : -5;
+        transition    : all 0.8s cubic-bezier(0, 0.4, 0, 1.01);
+        color         : rgba(236, 72, 153, 0.6);
     }
 
     .star-5 {
-    position      : absolute;
-    top           : 25%;
-    left          : 45%;
-    width         : 15px;
-    height        : auto;
-    filter        : drop-shadow(0 0 0 rgba(168, 85, 247, 0.5));
-    z-index       : -5;
-    transition    : all 0.6s cubic-bezier(0, 0.4, 0, 1.01);
-    color         : rgba(168, 85, 247, 0.6);
+        position      : absolute;
+        top           : 25%;
+        left          : 45%;
+        width         : 15px;
+        height        : auto;
+        filter        : drop-shadow(0 0 0 rgba(168, 85, 247, 0.5));
+        z-index       : -5;
+        transition    : all 0.6s cubic-bezier(0, 0.4, 0, 1.01);
+        color         : rgba(168, 85, 247, 0.6);
     }
 
     .star-6 {
-    position      : absolute;
-    top           : 5%;
-    left          : 50%;
-    width         : 5px;
-    height        : auto;
-    filter        : drop-shadow(0 0 0 rgba(236, 72, 153, 0.5));
-    z-index       : -5;
-    transition    : all 0.8s ease;
-    color         : rgba(236, 72, 153, 0.6);
+        position      : absolute;
+        top           : 5%;
+        left          : 50%;
+        width         : 5px;
+        height        : auto;
+        filter        : drop-shadow(0 0 0 rgba(236, 72, 153, 0.5));
+        z-index       : -5;
+        transition    : all 0.8s ease;
+        color         : rgba(236, 72, 153, 0.6);
     }
 
     button:hover {
-    background    : transparent;
-    color         : rgba(168, 85, 247, 0.9);
-    box-shadow    : 0 0 25px rgba(168, 85, 247, 0.4);
-    border-color  : rgba(168, 85, 247, 0.7);
+        background    : transparent;
+        color         : rgba(168, 85, 247, 0.9);
+        box-shadow    : 0 0 25px rgba(168, 85, 247, 0.4);
+        border-color  : rgba(168, 85, 247, 0.7);
     }
 
     button:hover .star-1 {
-    position      : absolute;
-    top           : -80%;
-    left          : -30%;
-    width         : 25px;
-    height        : auto;
-    filter        : drop-shadow(0 0 10px rgba(168, 85, 247, 0.8));
-    z-index       : 2;
+        position      : absolute;
+        top           : -80%;
+        left          : -30%;
+        width         : 25px;
+        height        : auto;
+        filter        : drop-shadow(0 0 10px rgba(168, 85, 247, 0.8));
+        z-index       : 2;
     }
 
     button:hover .star-2 {
-    position      : absolute;
-    top           : -40%;
-    left          : 16%;
-    width         : 15px;
-    height        : auto;
-    filter        : drop-shadow(0 0 10px rgba(236, 72, 153, 0.8));
-    z-index       : 2;
+        position      : absolute;
+        top           : -40%;
+        left          : 16%;
+        width         : 15px;
+        height        : auto;
+        filter        : drop-shadow(0 0 10px rgba(236, 72, 153, 0.8));
+        z-index       : 2;
     }
 
     button:hover .star-3 {
-    position      : absolute;
-    top           : 95%;
-    left          : 2%;
-    width         : 5px;
-    height        : auto;
-    filter        : drop-shadow(0 0 10px rgba(168, 85, 247, 0.8));
-    z-index       : 2;
+        position      : absolute;
+        top           : 95%;
+        left          : 2%;
+        width         : 5px;
+        height        : auto;
+        filter        : drop-shadow(0 0 10px rgba(168, 85, 247, 0.8));
+        z-index       : 2;
     }
 
     button:hover .star-4 {
-    position      : absolute;
-    top           : -70%;
-    left          : 75%;
-    width         : 8px;
-    height        : auto;
-    filter        : drop-shadow(0 0 10px rgba(236, 72, 153, 0.8));
-    z-index       : 2;
+        position      : absolute;
+        top           : -70%;
+        left          : 75%;
+        width         : 8px;
+        height        : auto;
+        filter        : drop-shadow(0 0 10px rgba(236, 72, 153, 0.8));
+        z-index       : 2;
     }
 
     button:hover .star-5 {
-    position      : absolute;
-    top           : 35%;
-    left          : 115%;
-    width         : 15px;
-    height        : auto;
-    filter        : drop-shadow(0 0 10px rgba(168, 85, 247, 0.8));
-    z-index       : 2;
+        position      : absolute;
+        top           : 35%;
+        left          : 115%;
+        width         : 15px;
+        height        : auto;
+        filter        : drop-shadow(0 0 10px rgba(168, 85, 247, 0.8));
+        z-index       : 2;
     }
 
     button:hover .star-6 {
-    position      : absolute;
-    top           : 75%;
-    left          : 60%;
-    width         : 5px;
-    height        : auto;
-    filter        : drop-shadow(0 0 10px rgba(236, 72, 153, 0.8));
-    z-index       : 2;
+        position      : absolute;
+        top           : 75%;
+        left          : 60%;
+        width         : 5px;
+        height        : auto;
+        filter        : drop-shadow(0 0 10px rgba(236, 72, 153, 0.8));
+        z-index       : 2;
     }
-
-    .fil0 {
-    fill          : rgba(168, 85, 247, 0.8);
-    }
-
 </style>
