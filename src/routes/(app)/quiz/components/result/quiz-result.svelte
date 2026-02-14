@@ -62,7 +62,7 @@
 </script>
 
 
-<div class="min-h-screen flex items-center justify-center  relative">
+<div class="min-h-screen flex items-center justify-center relative mt-12 sm:mt-0">
     <!-- Large background glow -->
     <div  class="max-w-4xl mx-auto w-full relative">
         <!-- !HTMLToImage -->
