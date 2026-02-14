@@ -1,7 +1,7 @@
 <script>
     import { goto } from "$app/navigation";
-
 </script>
+
 
 <button class="glass-btn" onclick={() => goto('/quiz')}>
     <span>Descubre tu Nen</span>
@@ -62,7 +62,7 @@
         box-shadow        :
             0 15px 30px rgba( 245, 158, 11, 0.3 ),
             inset 0 0 0 1px rgba( 245, 158, 11, 0.4 );
-        letter-spacing    : 1.5px;
+        /* letter-spacing    : 1.5px; */
     }
 
     .glass-btn:hover::before {
